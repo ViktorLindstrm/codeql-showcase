@@ -1,0 +1,38 @@
+name: Publish CodeQL Pack
+
+on:
+  push:
+    branches: [main]  # or any other target branch
+    paths:
+      - '**.ql'
+      - '**.qlpack.yml'
+      - '**.qlhelp'
+      - '.github/workflows/publish-codeql-pack.yml'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write  # Required to push to GHCR
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up CodeQL CLI
+      uses: github/codeql-action/init@v3
+      with:
+        languages: python
+
+    - name: Install CodeQL CLI (if needed)
+      uses: github/codeql-action/setup@v3
+
+    - name: Authenticate to GHCR
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Pack and publish CodeQL pack
+      run: |
+        codeql pack install
+        codeql pack publish --version-suffix "dev-${{ github.run_number }}"
