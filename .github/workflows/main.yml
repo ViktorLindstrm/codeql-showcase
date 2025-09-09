@@ -2,7 +2,7 @@ name: Publish CodeQL Pack
 
 on:
   push:
-    branches: [main]  # or any other target branch
+    branches: [main]
     paths:
       - '**.ql'
       - '**.qlpack.yml'
@@ -12,27 +12,27 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     permissions:
-      packages: write  # Required to push to GHCR
+      packages: write
       contents: read
+      security-events: write
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up CodeQL CLI
-      uses: github/codeql-action/init@v3
-      with:
-        languages: python
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript  # eller python, beroende på ditt projekt
 
-    - name: Install CodeQL CLI (if needed)
-      uses: github/codeql-action/setup@v3
+      - name: Autobuild (om behövs, ofta för kompilerade språk)
+        uses: github/codeql-action/autobuild@v3
 
-    - name: Authenticate to GHCR
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Analyze Code
+        uses: github/codeql-action/analyze@v3
 
-    - name: Pack and publish CodeQL pack
-      run: |
-        codeql pack install
-        codeql pack publish --version-suffix "dev-${{ github.run_number }}"
+      - name: Pack and publish CodeQL pack
+        run: |
+          codeql pack install
+          codeql pack publish --package "${{ github.repository_owner }}/my-codeql-pack" --version-suffix "dev-${{ github.run_number }}"
