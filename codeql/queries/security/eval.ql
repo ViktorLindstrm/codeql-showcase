@@ -1,6 +1,6 @@
 /**
  * @name Use of eval()
- * @description Detects use of the `eval()` function, which can lead to arbitrary code execution.
+ * @description Detects use of the `eval()` functions, which can lead to arbitrary code execution.
  * @kind problem
  * @problem.severity warning
  * @id js/eval-call
